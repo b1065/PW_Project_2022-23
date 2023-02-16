@@ -1,0 +1,127 @@
+﻿<Window x:Class="Chazan.GamesCatalog.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:StyleAlias="clr-namespace:Chazan.GamesCatalog.CORE;assembly=CORE"
+        xmlns:viewmodels="clr-namespace:Chazan.GamesCatalog.UI.ViewModel"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="StyleAlias:GameType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <Style x:Key="TextBoxWithErrors">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <ListBox DockPanel.Dock="Left" ItemsSource="{Binding ElementName=ErrorComponent, Path=AdornedElement.(Validation.Errors)}" DisplayMemberPath="ErrorContent" />
+                            <Grid>
+                                <Ellipse Width="20" Height="20" Stroke="Red" Fill="Red"></Ellipse>
+                                <Label Content="{Binding ElementName=ErrorComponent, Path=AdornedElement.(Validation.Errors).Count}" Foreground="White" ></Label>
+                            </Grid>
+                            <Border BorderBrush="DarkRed" BorderThickness="2">
+                                <AdornedElementPlaceholder Name="ErrorComponent"/>
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Control.MaxWidth" Value="150"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="Control.Margin" Value="20 2 2 50" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <TabControl x:Name="Tc">
+        <TabItem Header="Games" Margin="0,0,-2,0" HorizontalAlignment="Right" Width="48" Height="22" VerticalAlignment="Bottom">
+            <TabItem.DataContext>
+                <viewmodels:GameListViewModel x:Name="Glvm"/>
+            </TabItem.DataContext>
+            <DockPanel LastChildFill="True">
+                <ListBox DockPanel.Dock="Left" Name="GameListPanel" ItemsSource="{Binding Games}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedGame}" />
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <Button MinWidth="85" Command="{Binding FilterTypeCommand}">Filter by Type</Button>
+                    <ComboBox MinWidth="100" Text="{Binding FilterTypeValue}" Style="{StaticResource TextBoxWithErrors}" ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding Type}" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <Button MinWidth="85" Command="{Binding FilterDataCommand}">Filter by Name</Button>
+                    <TextBox MinWidth="100" Text="{Binding FilterValue}"></TextBox>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <Button Command="{Binding AddNewGameCommand}">Add New Game</Button>
+                    <Button Command="{Binding SaveGameCommand}">Save Game</Button>
+                    <Button Command="{Binding DeleteGameCommand}">Delete Game</Button>
+                </StackPanel>
+                <Grid Name="GameDetailsList" DataContext="{Binding EditedGame}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0">Name:</Label>
+                        <Label Grid.Row="1">Producer:</Label>
+                        <Label Grid.Row="2">Type:</Label>
+                        <Label Grid.Row="3">Price:</Label>
+                        <TextBox Style="{StaticResource TextBoxWithErrors}" Grid.Row="0" Grid.Column="1" MinWidth="150" Text="{Binding Name}"/>
+                        <ComboBox x:Name="ProducerComboBox" Style="{StaticResource TextBoxWithErrors}" Grid.Row="1" Grid.Column="1" DisplayMemberPath="Name" SelectedItem="{Binding Producer}" />
+                        <ComboBox Style="{StaticResource TextBoxWithErrors}" Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding Type}" />
+                        <TextBox Style="{StaticResource TextBoxWithErrors}" Grid.Row="3" Grid.Column="1" MinWidth="150" Text="{Binding Price}"/>
+                    </Grid>
+                </Grid>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Producers">
+            <TabItem.DataContext>
+                <viewmodels:ProducerListViewModel/>
+            </TabItem.DataContext>
+            <DockPanel LastChildFill="True">
+                <ListBox DockPanel.Dock="Left" Name="ProducerListPanel" ItemsSource="{Binding Producers}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedProducer}" />
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <Button Command="{Binding FilterDataCommand}">Filter</Button>
+                    <TextBox MinWidth="100" Text="{Binding FilterValue}"></TextBox>
+                    <Button Command="{Binding AddNewProducerCommand}">Add New Producer</Button>
+                    <Button Command="{Binding SaveProducerCommand}">Save Producer</Button>
+                    <Button Command="{Binding DeleteProducerCommand}">Delete Producer</Button>
+                </StackPanel>
+                <Grid Name="ProdDetailsList" DataContext="{Binding EditedProducer}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0">Name:</Label>
+                        <Label Grid.Row="1">Country:</Label>
+                        <TextBox Style="{StaticResource TextBoxWithErrors}" Grid.Row="0" Grid.Column="1" MinWidth="150" Text="{Binding Name}"/>
+                        <TextBox Style="{StaticResource TextBoxWithErrors}" Grid.Row="1" Grid.Column="1" MinWidth="150" Text="{Binding Country}"/>
+                    </Grid>
+                </Grid>
+            </DockPanel>
+        </TabItem>
+    </TabControl>
+</Window>
